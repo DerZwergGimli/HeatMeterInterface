@@ -41,7 +41,7 @@ public:
     ConfigInterface();
 
     bool init();
-    bool loadConfig(struct Configuratrion *config, struct MeterData (&meterData)[4]);
+    bool loadConfig(struct Configuratrion *config, MeterData (&meterData)[4]);
     bool saveConfig(Configuratrion config);
     void serialPrintConfig(Configuratrion config);
 };
