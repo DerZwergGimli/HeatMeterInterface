@@ -5,6 +5,7 @@
 #include "ShiftRegisterIO.h"
 #include "ConfigInterface.h"
 #include "TemperatureInterface.h"
+#include "DisplayInterface.h"
 #include <Adafruit_MAX31865.h>
 #include <Esp.h>
 
@@ -13,6 +14,7 @@
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define OLED_RESET -1    // Reset pin # (or -1 if sharing Arduino reset pin)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+DisplayInterface displayInterface;
 
 //PT100 Configurartion
 Adafruit_MAX31865 thermo = Adafruit_MAX31865(D8, D7, D6, D5);
@@ -52,15 +54,8 @@ void setup()
     for (;;)
       Serial.print("Error while connecting to Display"); // Don't proceed, loop forever
   }
-  display.display();
-  delay(2000);
 
-  display.clearDisplay();
-  display.setTextSize(2); // Draw 2X-scale text
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(10, 0);
-  display.println("Booting...");
-  display.display();
+  displayInterface.boot(&display);
 
   configInterface.init();
   configInterface.loadConfig(&config, meterData);
@@ -73,20 +68,22 @@ void setup()
 
 void loop()
 {
+
   //1. Display
+  displayInterface.displayMeter(&display, &meterData[0]);
   //2.1 Take Measurements
   //2.2 Calculate
   //3. Send Measuremnts
   //4. check user input
   // do all over again
 
-  display.clearDisplay();
-  display.setCursor(10, 10);
+  //display.clearDisplay();
+  //display.setCursor(10, 10);
 
   int analogValue = analogRead(RMUX_IN);
   Serial.print("Analaog: ");
   Serial.println(String(analogValue));
-  display.println(analogValue);
+  //display.println(analogValue);
 
   // channel_RJ1.temperature_up_Celcius = temperatureInterface.readTemperature(thermo, RNOMINAL, config.RREF_RJ1_T1, true);
 
@@ -110,6 +107,6 @@ void loop()
   //sr_io = shiftRegisterIO.t_MuxSelect(sr_io, -1);
   //shiftRegisterIO.write(sr_io);
 
-  display.display();
+  //display.display();
   delay(1000);
 }

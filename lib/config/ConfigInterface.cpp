@@ -40,7 +40,7 @@ bool ConfigInterface::loadConfig(struct Configuratrion *conf, struct MeterData (
     // use configFile.readString instead.
     configFile.readBytes(buf.get(), size);
 
-    StaticJsonDocument<400> doc;
+    StaticJsonDocument<1072> doc;
     auto error = deserializeJson(doc, buf.get());
     if (error)
     {
