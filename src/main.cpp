@@ -80,7 +80,7 @@ void setup()
   delay(1000);
   //displayTask.enable();
   //measureTask.enable();
-
+  shiftRegisterIO.led_READY(&shiftRegisterIO, &sr_io, true);
   runner.startNow();
 
   //shiftRegisterIO.ledBlink(1000);
@@ -90,7 +90,6 @@ void loop()
 {
   runner.execute();
   Serial.print("CPU_tot: ");
-  
 
   //1. Display
   //displayInterface.displayMeter(&display, &meterData[0]);
@@ -145,7 +144,6 @@ void displayTask_Callback()
 
   case 1: //Show Meter 1
     displayInterface.displayMeter(&display, &meterData[0]);
-    readyLED(false);
     displayState++;
     break;
 
@@ -157,7 +155,6 @@ void displayTask_Callback()
   case 3: //Show Meter 3
     displayInterface.displayMeter(&display, &meterData[2]);
     displayState++;
-    readyLED(true);
     break;
 
   case 4: //Show Meter 4
@@ -172,10 +169,24 @@ void displayTask_Callback()
 
 void measureTask_Callback()
 {
+  shiftRegisterIO.led_RJ1(&shiftRegisterIO, &sr_io, true);
   temperatureInterface.readTemperature(thermo, &sr_io, &meterData[0]);
+  //Read Resistance
+  //calculate
+
+  shiftRegisterIO.led_RJ1(&shiftRegisterIO, &sr_io, false);
+
+  shiftRegisterIO.led_RJ2(&shiftRegisterIO, &sr_io, true);
   temperatureInterface.readTemperature(thermo, &sr_io, &meterData[1]);
+  shiftRegisterIO.led_RJ2(&shiftRegisterIO, &sr_io, false);
+
+  shiftRegisterIO.led_RJ3(&shiftRegisterIO, &sr_io, true);
   temperatureInterface.readTemperature(thermo, &sr_io, &meterData[2]);
+  shiftRegisterIO.led_RJ3(&shiftRegisterIO, &sr_io, false);
+
+  shiftRegisterIO.led_RJ4(&shiftRegisterIO, &sr_io, true);
   temperatureInterface.readTemperature(thermo, &sr_io, &meterData[3]);
+  shiftRegisterIO.led_RJ4(&shiftRegisterIO, &sr_io, false);
 }
 
 void readyLED(bool state)
