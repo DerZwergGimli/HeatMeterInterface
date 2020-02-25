@@ -12,13 +12,13 @@ struct SR_IO
     bool RMuxS0 = false;
     bool Distance_Enable = false;
 
-    bool LED_Wifi = true;
-    bool LED_Error = true;
-    bool LED_Ready = true;
+    bool LED_Wifi = false;
+    bool LED_Error = false;
+    bool LED_Ready = false;
     bool LED_RJ4 = false;
     bool LED_RJ3 = false;
     bool LED_RJ2 = false;
-    bool LED_RJ1 = true;
+    bool LED_RJ1 = false;
     bool OLED_Enbable = true;
 
     bool RJ4_Counter = true; // Keep this mostly true using pnp-transostor
@@ -46,5 +46,13 @@ public:
     SR_IO r_MuxSelect(SR_IO sr_io, int channel);
     void t_MuxSelect(struct SR_IO *sr_io, int channel);
     void write(struct SR_IO *sr_io);
+
+    void led_ERROR(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
+    void led_READY(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
+    void led_WIFI(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
+    void led_RJ1(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
+    void led_RJ2(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
+    void led_RJ3(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
+    void led_RJ4(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
 };
 #endif

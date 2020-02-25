@@ -217,6 +217,29 @@ void ShiftRegisterIO::t_MuxSelect(struct SR_IO *sr_io, int channel)
     }
 }
 
+void ShiftRegisterIO::led_ERROR(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle)
+{
+
+    sr_io->LED_Ready = toggle;
+    shiftRegisterIO->write(sr_io);
+}
+
+void ShiftRegisterIO::led_READY(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle)
+{
+    sr_io->LED_Ready = toggle;
+    shiftRegisterIO->write(sr_io);
+}
+
+void ShiftRegisterIO::led_WIFI(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle)
+{
+    sr_io->LED_Ready = toggle;
+    shiftRegisterIO->write(sr_io);
+}
+void ShiftRegisterIO::led_RJ1(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle) { ; }
+void ShiftRegisterIO::led_RJ2(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle) { ; }
+void ShiftRegisterIO::led_RJ3(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle) { ; }
+void ShiftRegisterIO::led_RJ4(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle) { ; }
+
 void ShiftRegisterIO::write(struct SR_IO *sr_io)
 {
     // Close and ENABLE register
