@@ -39,3 +39,12 @@ void DisplayInterface ::displayMeter(Adafruit_SSD1306 *display, struct MeterData
 
     display->display();
 }
+
+void DisplayInterface::printHello(Adafruit_SSD1306 *display)
+{
+    display->clearDisplay();
+    display->setCursor(0, 0);
+    display->setTextSize(2);
+    display->print("Hello");
+    display->display();
+}

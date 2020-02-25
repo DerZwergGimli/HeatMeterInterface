@@ -9,6 +9,19 @@
 #include <Adafruit_MAX31865.h>
 #include <Esp.h>
 
+#include <TaskScheduler.h>
+
+//Delegates for platform.io
+void displayTask_Callback();
+void measureTask_Callback();
+void readyLED(bool state);
+
+//Scheduled Task setup
+#define _TASK_SLEEP_ON_IDLE_RUN
+Scheduler runner;
+Task displayTask(1000, TASK_FOREVER, &displayTask_Callback, &runner, true);
+Task measureTask(1000, TASK_FOREVER, &measureTask_Callback, &runner, true);
+
 // Display Configuration
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -33,8 +46,7 @@ SR_IO sr_io;
 ConfigInterface configInterface;
 Configuratrion config;
 MeterData meterData[4];
-
-void readTemperature(int port, int sensor, bool printSerial);
+int displayState = 0;
 
 void setup()
 {
@@ -59,18 +71,29 @@ void setup()
 
   configInterface.init();
   configInterface.loadConfig(&config, meterData);
-  configInterface.serialPrintConfig(config);
 
   temperatureInterface.init(thermo);
+
+  //runner.init();
+  //runner.addTask(displayTask);
+  //runner.addTask(measureTask);
+  delay(1000);
+  //displayTask.enable();
+  //measureTask.enable();
+
+  runner.startNow();
 
   //shiftRegisterIO.ledBlink(1000);
 }
 
 void loop()
 {
+  runner.execute();
+  Serial.print("CPU_tot: ");
+  
 
   //1. Display
-  displayInterface.displayMeter(&display, &meterData[0]);
+  //displayInterface.displayMeter(&display, &meterData[0]);
   //2.1 Take Measurements
   //2.2 Calculate
   //3. Send Measuremnts
@@ -80,10 +103,10 @@ void loop()
   //display.clearDisplay();
   //display.setCursor(10, 10);
 
-  int analogValue = analogRead(RMUX_IN);
-  Serial.print("Analaog: ");
-  Serial.println(String(analogValue));
-  //display.println(analogValue);
+  // int analogValue = analogRead(RMUX_IN);
+  // Serial.print("Analaog: ");
+  // Serial.println(String(analogValue));
+  // //display.println(analogValue);
 
   // channel_RJ1.temperature_up_Celcius = temperatureInterface.readTemperature(thermo, RNOMINAL, config.RREF_RJ1_T1, true);
 
@@ -91,22 +114,72 @@ void loop()
   // shiftRegisterIO.write(sr_io);
   // channel_RJ1.temperature_down_Celcius = temperatureInterface.readTemperature(&thermo, RNOMINAL, config.RREF_RJ1_T2, true);
 
-  meterData[0].mux_up = 5;
-  meterData[0].mux_down = 7;
-  Serial.print(meterData[0].RREF_up);
-  //meterData[0].RREF_up = 240;
+  // meterData[0].mux_up = 5;
+  // meterData[0].mux_down = 7;
+  // Serial.print(meterData[0].RREF_up);
+  // //meterData[0].RREF_up = 240;
   //meterData[0].RREF_down = 240;
-  temperatureInterface.readTemperature(thermo, &sr_io, &meterData[0]);
+  //temperatureInterface.readTemperature(thermo, &sr_io, &meterData[0]);
 
-  Serial.print("UP ");
-  Serial.println(String(meterData[0].temperature_up_Celcius));
-  Serial.print("DOWN ");
-  Serial.println(String(meterData[0].temperature_down_Celcius));
+  // Serial.print("UP ");
+  // Serial.println(String(meterData[0].temperature_up_Celcius));
+  // Serial.print("DOWN ");
+  // Serial.println(String(meterData[0].temperature_down_Celcius));
 
   //readTemperature(0, 0, true);
   //sr_io = shiftRegisterIO.t_MuxSelect(sr_io, -1);
   //shiftRegisterIO.write(sr_io);
 
   //display.display();
-  delay(1000);
+  //delay(1000);
+}
+
+void displayTask_Callback()
+{
+  switch (displayState)
+  {
+  case 0:
+    displayInterface.printHello(&display);
+    displayState++;
+    break;
+
+  case 1: //Show Meter 1
+    displayInterface.displayMeter(&display, &meterData[0]);
+    readyLED(false);
+    displayState++;
+    break;
+
+  case 2: //Show Meter 2
+    displayInterface.displayMeter(&display, &meterData[1]);
+    displayState++;
+    break;
+
+  case 3: //Show Meter 3
+    displayInterface.displayMeter(&display, &meterData[2]);
+    displayState++;
+    readyLED(true);
+    break;
+
+  case 4: //Show Meter 4
+    displayInterface.displayMeter(&display, &meterData[3]);
+    displayState = 1;
+    break;
+
+  default:
+    break;
+  }
+}
+
+void measureTask_Callback()
+{
+  temperatureInterface.readTemperature(thermo, &sr_io, &meterData[0]);
+  temperatureInterface.readTemperature(thermo, &sr_io, &meterData[1]);
+  temperatureInterface.readTemperature(thermo, &sr_io, &meterData[2]);
+  temperatureInterface.readTemperature(thermo, &sr_io, &meterData[3]);
+}
+
+void readyLED(bool state)
+{
+  sr_io.LED_Ready = state;
+  shiftRegisterIO.write(&sr_io);
 }

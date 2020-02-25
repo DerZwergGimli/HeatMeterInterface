@@ -9,6 +9,7 @@ public:
     DisplayInterface();
 
     void boot(Adafruit_SSD1306 *display);
+    void printHello(Adafruit_SSD1306 *display);
     void displayMeter(Adafruit_SSD1306 *display, struct MeterData *meterData);
 };
 

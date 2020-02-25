@@ -58,6 +58,30 @@ bool ConfigInterface::loadConfig(struct Configuratrion *conf, struct MeterData (
     meterData[0].hardware_CounterValue = doc["RJ1_Hardware_CounterValue"];
     meterData[0].water_CounterValue_m3 = doc["RJ1_Water_CounterValue_m3"];
 
+    meterData[1].meterID = doc["RJ2_MeterID"];
+    meterData[1].RREF_up = doc["RJ2_RREF_T1"];
+    meterData[1].RREF_down = doc["RJ2_RREF_T2"];
+    meterData[1].mux_up = doc["RJ2_MUX_T1"];
+    meterData[1].mux_down = doc["RJ2_MUX_T2"];
+    meterData[1].hardware_CounterValue = doc["RJ2_Hardware_CounterValue"];
+    meterData[1].water_CounterValue_m3 = doc["RJ2_Water_CounterValue_m3"];
+
+    meterData[2].meterID = doc["RJ3_MeterID"];
+    meterData[2].RREF_up = doc["RJ3_RREF_T1"];
+    meterData[2].RREF_down = doc["RJ3_RREF_T2"];
+    meterData[2].mux_up = doc["RJ3_MUX_T1"];
+    meterData[2].mux_down = doc["RJ3_MUX_T2"];
+    meterData[2].hardware_CounterValue = doc["RJ3_Hardware_CounterValue"];
+    meterData[2].water_CounterValue_m3 = doc["RJ3_Water_CounterValue_m3"];
+
+    meterData[3].meterID = doc["RJ4_MeterID"];
+    meterData[3].RREF_up = doc["RJ4_RREF_T1"];
+    meterData[3].RREF_down = doc["RJ4_RREF_T2"];
+    meterData[3].mux_up = doc["RJ4_MUX_T1"];
+    meterData[3].mux_down = doc["RJ4_MUX_T2"];
+    meterData[3].hardware_CounterValue = doc["RJ4_Hardware_CounterValue"];
+    meterData[3].water_CounterValue_m3 = doc["RJ4_Water_CounterValue_m3"];
+
     return false;
 }
 
