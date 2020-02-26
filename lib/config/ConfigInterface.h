@@ -1,6 +1,8 @@
 #ifndef ConfigInterface_h
 #define ConfigInterface_h
 
+#include "ExpSmooth.h"
+
 struct Configuratrion
 {
     int ID;
@@ -21,7 +23,15 @@ struct MeterData
     bool ledState;
     long hardware_CounterValue;
     float temperature_up_Celcius;
+    ExpSmooth temperature_up_Celcius_smooth;
+    float temperature_up_Celcius_mean;
+    float temperature_up_Celcius_sum;
+    int temperature_up_Celcius_numberOfPoints;
     float temperature_down_Celcius;
+    ExpSmooth temperature_down_Celcius_smooth;
+    float temperature_down_Celcius_mean;
+    float temperature_down_Celcius_sum;
+    int temperature_down_Celcius_numberOfPoints;
     float water_CounterValue_m3;
 
     float delta_HeatEnergy_J;
@@ -31,8 +41,12 @@ struct MeterData
 
     float RREF_up;
     float RREF_down;
+
     int mux_up;
     int mux_down;
+    int mux_resistance;
+    int mux_resistance_threshold;
+    bool mux_resistance_edgeDetect;
 };
 
 class ConfigInterface

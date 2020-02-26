@@ -1,5 +1,7 @@
 #include "ShiftRegisterIO.h"
 #include <Arduino.h>
+#include "ConfigInterface.h"
+#include "Arduino.h"
 
 //### SHIFT REGISTER PINS
 int shiftRegister_Latch = D3;
@@ -112,57 +114,56 @@ void ShiftRegisterIO::ledBlink(int time)
     write(&sr_io);
 }
 
-SR_IO ShiftRegisterIO::r_MuxSelect(SR_IO sr_io, int channel)
+void ShiftRegisterIO::r_MuxSelect(struct SR_IO *sr_io, int channel)
 {
     switch (channel)
     {
     case 0:
-        sr_io.RMuxS0 = false;
-        sr_io.RMuxS1 = false;
-        sr_io.RMuxS2 = false;
+        sr_io->RMuxS0 = false;
+        sr_io->RMuxS1 = false;
+        sr_io->RMuxS2 = false;
         break;
     case 1:
-        sr_io.RMuxS0 = true;
-        sr_io.RMuxS1 = false;
-        sr_io.RMuxS2 = false;
+        sr_io->RMuxS0 = true;
+        sr_io->RMuxS1 = false;
+        sr_io->RMuxS2 = false;
         break;
     case 2:
-        sr_io.RMuxS0 = false;
-        sr_io.RMuxS1 = true;
-        sr_io.RMuxS2 = false;
+        sr_io->RMuxS0 = false;
+        sr_io->RMuxS1 = true;
+        sr_io->RMuxS2 = false;
         break;
     case 3:
-        sr_io.RMuxS0 = true;
-        sr_io.RMuxS1 = true;
-        sr_io.RMuxS2 = false;
+        sr_io->RMuxS0 = true;
+        sr_io->RMuxS1 = true;
+        sr_io->RMuxS2 = false;
         break;
     case 4:
-        sr_io.RMuxS0 = false;
-        sr_io.RMuxS1 = false;
-        sr_io.RMuxS2 = true;
+        sr_io->RMuxS0 = false;
+        sr_io->RMuxS1 = false;
+        sr_io->RMuxS2 = true;
         break;
     case 5:
-        sr_io.RMuxS0 = true;
-        sr_io.RMuxS1 = false;
-        sr_io.RMuxS2 = true;
+        sr_io->RMuxS0 = true;
+        sr_io->RMuxS1 = false;
+        sr_io->RMuxS2 = true;
         break;
     case 6:
-        sr_io.RMuxS0 = false;
-        sr_io.RMuxS1 = true;
-        sr_io.RMuxS2 = true;
+        sr_io->RMuxS0 = false;
+        sr_io->RMuxS1 = true;
+        sr_io->RMuxS2 = true;
         break;
     case 7:
-        sr_io.RMuxS0 = true;
-        sr_io.RMuxS1 = true;
-        sr_io.RMuxS2 = true;
+        sr_io->RMuxS0 = true;
+        sr_io->RMuxS1 = true;
+        sr_io->RMuxS2 = true;
         break;
     default:
-        sr_io.RMuxS0 = false;
-        sr_io.RMuxS1 = false;
-        sr_io.RMuxS2 = false;
+        sr_io->RMuxS0 = false;
+        sr_io->RMuxS1 = false;
+        sr_io->RMuxS2 = false;
         break;
     }
-    return sr_io;
 }
 
 void ShiftRegisterIO::t_MuxSelect(struct SR_IO *sr_io, int channel)
@@ -217,6 +218,55 @@ void ShiftRegisterIO::t_MuxSelect(struct SR_IO *sr_io, int channel)
     }
 }
 
+void ShiftRegisterIO::checkMeterResistance(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, struct MeterData *meterData)
+{
+    shiftRegisterIO->r_MuxSelect(sr_io, meterData->mux_resistance);
+    shiftRegisterIO->write(sr_io);
+
+    int analogValue = analogRead(A0);
+
+    Serial.print(analogValue);
+    Serial.print(meterData->mux_resistance_threshold);
+
+    if (analogValue <= meterData->mux_resistance_threshold)
+    {
+
+        if (!meterData->waterMeterState)
+        {
+            meterData->waterMeterState = true;
+            //meterData->mux_resistance_edgeDetect = true;
+        }
+
+        //meterData->waterMeterState = true;
+    }
+    else
+    {
+
+        if (meterData->waterMeterState)
+        {
+            meterData->mux_resistance_edgeDetect = true;
+            meterData->waterMeterState = false;
+        }
+        else
+        {
+            //meterData->waterMeterState = false;
+            meterData->mux_resistance_edgeDetect = false;
+        }
+
+        //meterData->waterMeterState = false;
+        //if (meterData->mux_resistance_edgeDetect)
+        //{
+        //    meterData->water_CounterValue_m3 += 5;
+        //    meterData->mux_resistance_edgeDetect = false;
+        //}
+    }
+
+    //meterData->waterMeterState = a
+
+    shiftRegisterIO->r_MuxSelect(sr_io, 99);
+    shiftRegisterIO->write(sr_io);
+}
+
 void ShiftRegisterIO::led_ERROR(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle)
 {
 
@@ -253,6 +303,27 @@ void ShiftRegisterIO::led_RJ3(struct ShiftRegisterIO *shiftRegisterIO, struct SR
 void ShiftRegisterIO::led_RJ4(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle)
 {
     sr_io->LED_RJ4 = toggle;
+    shiftRegisterIO->write(sr_io);
+}
+
+void ShiftRegisterIO::led_statusRJ1(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle)
+{
+    sr_io->RJ1_Status = toggle;
+    shiftRegisterIO->write(sr_io);
+}
+void ShiftRegisterIO::led_statusRJ2(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle)
+{
+    sr_io->RJ2_Status = toggle;
+    shiftRegisterIO->write(sr_io);
+}
+void ShiftRegisterIO::led_statusRJ3(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle)
+{
+    sr_io->RJ3_Status = toggle;
+    shiftRegisterIO->write(sr_io);
+}
+void ShiftRegisterIO::led_statusRJ4(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle)
+{
+    sr_io->RJ4_Status = toggle;
     shiftRegisterIO->write(sr_io);
 }
 

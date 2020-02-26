@@ -80,7 +80,7 @@ void setup()
   delay(1000);
   //displayTask.enable();
   //measureTask.enable();
-  shiftRegisterIO.led_READY(&shiftRegisterIO, &sr_io, true);
+  //shiftRegisterIO.led_READY(&shiftRegisterIO, &sr_io, true);
   runner.startNow();
 
   //shiftRegisterIO.ledBlink(1000);
@@ -89,7 +89,6 @@ void setup()
 void loop()
 {
   runner.execute();
-  Serial.print("CPU_tot: ");
 
   //1. Display
   //displayInterface.displayMeter(&display, &meterData[0]);
@@ -135,16 +134,18 @@ void loop()
 
 void displayTask_Callback()
 {
+  shiftRegisterIO.led_READY(&shiftRegisterIO, &sr_io, true);
+  shiftRegisterIO.led_READY(&shiftRegisterIO, &sr_io, false);
   switch (displayState)
   {
   case 0:
-    displayInterface.printHello(&display);
+    displayInterface.boot(&display);
     displayState++;
     break;
 
   case 1: //Show Meter 1
     displayInterface.displayMeter(&display, &meterData[0]);
-    displayState++;
+    //displayState++;
     break;
 
   case 2: //Show Meter 2
@@ -169,24 +170,43 @@ void displayTask_Callback()
 
 void measureTask_Callback()
 {
+  unsigned long start = millis();
+
   shiftRegisterIO.led_RJ1(&shiftRegisterIO, &sr_io, true);
   temperatureInterface.readTemperature(thermo, &sr_io, &meterData[0]);
-  //Read Resistance
-  //calculate
+  shiftRegisterIO.checkMeterResistance(&shiftRegisterIO, &sr_io, &meterData[0]);
+  if (meterData[0].waterMeterState)
+  {
+    shiftRegisterIO.led_statusRJ1(&shiftRegisterIO, &sr_io, true);
+  }
+  else
+  {
+    shiftRegisterIO.led_statusRJ1(&shiftRegisterIO, &sr_io, false);
+  }
+  if (meterData[0].mux_resistance_edgeDetect)
+  {
+    meterData->water_CounterValue_m3 += 5;
+    meterData->delta_HeatEnergy_J += 4200 * 5 * (meterData->temperature_up_Celcius_mean - meterData->temperature_down_Celcius_mean);
+  }
 
   shiftRegisterIO.led_RJ1(&shiftRegisterIO, &sr_io, false);
 
-  shiftRegisterIO.led_RJ2(&shiftRegisterIO, &sr_io, true);
-  temperatureInterface.readTemperature(thermo, &sr_io, &meterData[1]);
-  shiftRegisterIO.led_RJ2(&shiftRegisterIO, &sr_io, false);
+  //shiftRegisterIO.led_RJ2(&shiftRegisterIO, &sr_io, true);
+  //temperatureInterface.readTemperature(thermo, &sr_io, &meterData[1]);
+  //shiftRegisterIO.led_RJ2(&shiftRegisterIO, &sr_io, false);
 
-  shiftRegisterIO.led_RJ3(&shiftRegisterIO, &sr_io, true);
-  temperatureInterface.readTemperature(thermo, &sr_io, &meterData[2]);
-  shiftRegisterIO.led_RJ3(&shiftRegisterIO, &sr_io, false);
+  //shiftRegisterIO.led_RJ3(&shiftRegisterIO, &sr_io, true);
+  //temperatureInterface.readTemperature(thermo, &sr_io, &meterData[2]);
+  //shiftRegisterIO.led_RJ3(&shiftRegisterIO, &sr_io, false);
 
-  shiftRegisterIO.led_RJ4(&shiftRegisterIO, &sr_io, true);
-  temperatureInterface.readTemperature(thermo, &sr_io, &meterData[3]);
-  shiftRegisterIO.led_RJ4(&shiftRegisterIO, &sr_io, false);
+  //shiftRegisterIO.led_RJ4(&shiftRegisterIO, &sr_io, true);
+  //temperatureInterface.readTemperature(thermo, &sr_io, &meterData[3]);
+  //shiftRegisterIO.led_RJ4(&shiftRegisterIO, &sr_io, false);
+
+  unsigned long end = millis();
+  unsigned long duration = end - start;
+  Serial.print("Duration:");
+  Serial.println(duration);
 }
 
 void readyLED(bool state)

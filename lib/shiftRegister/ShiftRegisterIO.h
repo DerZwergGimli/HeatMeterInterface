@@ -1,5 +1,6 @@
 #ifndef ShiftRegisterIO_h
 #define ShiftRegisterIO_h
+#include "ConfigInterface.h"
 
 struct SR_IO
 {
@@ -28,7 +29,7 @@ struct SR_IO
     bool RJ2_Counter = true; // Keep this mostly true using pnp-transostor
     bool RJ2_Status = false;
     bool RJ1_Counter = true; // Keep this mostly true using pnp-transostor
-    bool RJ1_Status = true;
+    bool RJ1_Status = false;
 };
 
 class ShiftRegisterIO
@@ -43,10 +44,13 @@ public:
     void allZero();
 
     void ledBlink(int time);
-    SR_IO r_MuxSelect(SR_IO sr_io, int channel);
+    void r_MuxSelect(struct SR_IO *sr_io, int channel);
     void t_MuxSelect(struct SR_IO *sr_io, int channel);
     void write(struct SR_IO *sr_io);
 
+    void checkMeterResistance(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, struct MeterData *meterData);
+
+    // LED IO_Config
     void led_ERROR(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
     void led_READY(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
     void led_WIFI(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
@@ -54,5 +58,9 @@ public:
     void led_RJ2(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
     void led_RJ3(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
     void led_RJ4(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
+    void led_statusRJ1(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
+    void led_statusRJ2(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
+    void led_statusRJ3(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
+    void led_statusRJ4(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
 };
 #endif

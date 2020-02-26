@@ -18,16 +18,53 @@ void TemperatureInterface::readTemperature(Adafruit_MAX31865 thermo, struct SR_I
     // int : sensor = number of sensor either 1 or 2
     // bool : printSerial is for serial debugging
     float RNOMINAL = 100.0;
+    //TODO: EDIT TO Pinter
     ShiftRegisterIO shiftRegisterIO;
 
+    //      UP
     shiftRegisterIO.t_MuxSelect(sr_io, meterData->mux_up);
     shiftRegisterIO.write(sr_io);
-    delay(100);
-    meterData->temperature_up_Celcius = thermo.temperature(RNOMINAL, meterData->RREF_up);
+    float temp_up = thermo.temperature(RNOMINAL, meterData->RREF_up);
 
+    if (meterData->temperature_up_Celcius_mean == 0)
+    {
+        //meterData->temperature_up_Celcius_smooth.setInitial(temp_up * 100);
+        meterData->temperature_up_Celcius_mean = temp_up;
+        meterData->temperature_up_Celcius_sum = 0;
+        meterData->temperature_up_Celcius_numberOfPoints = 0;
+    }
+
+    meterData->temperature_up_Celcius = temp_up;
+    //meterData->temperature_up_Celcius_mean = ((float)meterData->temperature_up_Celcius_smooth.calc25(temp_up * 100)) / 100;
+    meterData->temperature_up_Celcius_sum += temp_up;
+    meterData->temperature_up_Celcius_numberOfPoints++;
+    meterData->temperature_up_Celcius_mean = meterData->temperature_up_Celcius_sum / meterData->temperature_up_Celcius_numberOfPoints;
+
+    //      DOWN
     shiftRegisterIO.t_MuxSelect(sr_io, meterData->mux_down);
     shiftRegisterIO.write(sr_io);
-    meterData->temperature_down_Celcius = thermo.temperature(RNOMINAL, meterData->RREF_down);
+    float temp_down = thermo.temperature(RNOMINAL, meterData->RREF_down);
+    if (meterData->temperature_down_Celcius_mean == 0)
+    {
+        //meterData->temperature_down_Celcius_smooth.setInitial(temp_down * 100);
+        meterData->temperature_down_Celcius_mean = temp_down;
+        meterData->temperature_down_Celcius_sum = 0;
+        meterData->temperature_down_Celcius_numberOfPoints = 0;
+    }
+
+    meterData->temperature_down_Celcius = temp_down;
+    //meterData->temperature_down_Celcius_mean = ((float)meterData->temperature_down_Celcius_smooth.calc25(temp_down * 100)) / 100;
+    meterData->temperature_down_Celcius_sum += temp_down;
+    meterData->temperature_down_Celcius_numberOfPoints++;
+    meterData->temperature_down_Celcius_mean = meterData->temperature_down_Celcius_sum / meterData->temperature_down_Celcius_numberOfPoints;
+
+    // shiftRegisterIO.t_MuxSelect(sr_io, meterData->mux_up);
+    // shiftRegisterIO.write(sr_io);
+    // meterData->temperature_up_Celcius = thermo.temperature(RNOMINAL, meterData->RREF_up);
+
+    // shiftRegisterIO.t_MuxSelect(sr_io, meterData->mux_down);
+    // shiftRegisterIO.write(sr_io);
+    // meterData->temperature_down_Celcius = thermo.temperature(RNOMINAL, meterData->RREF_down);
 
     // uint16_t rtd = thermo.readRTD();
     // float ratio = rtd;

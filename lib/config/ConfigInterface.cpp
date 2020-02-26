@@ -26,7 +26,7 @@ bool ConfigInterface::loadConfig(struct Configuratrion *conf, struct MeterData (
     }
 
     int size = configFile.size();
-    if (size > 1024)
+    if (size > 2048)
     {
         Serial.println("Config file size is too large");
         return false;
@@ -55,6 +55,8 @@ bool ConfigInterface::loadConfig(struct Configuratrion *conf, struct MeterData (
     meterData[0].RREF_down = doc["RJ1_RREF_T2"];
     meterData[0].mux_up = doc["RJ1_MUX_T1"];
     meterData[0].mux_down = doc["RJ1_MUX_T2"];
+    meterData[0].mux_resistance = doc["RJ1_MUX_R"];
+    meterData[0].mux_resistance_threshold = doc["RJ1_MUX_R_Threshold"];
     meterData[0].hardware_CounterValue = doc["RJ1_Hardware_CounterValue"];
     meterData[0].water_CounterValue_m3 = doc["RJ1_Water_CounterValue_m3"];
 

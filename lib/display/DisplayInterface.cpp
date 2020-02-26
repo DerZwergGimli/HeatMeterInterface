@@ -10,7 +10,7 @@ void DisplayInterface::boot(Adafruit_SSD1306 *display)
     display->clearDisplay();
     display->setTextSize(2); // Draw 2X-scale text
     display->setTextColor(SSD1306_WHITE);
-    display->setCursor(10, 0);
+    display->setCursor(0, 0);
     display->println("Booting...");
     display->display();
 }
@@ -24,18 +24,25 @@ void DisplayInterface ::displayMeter(Adafruit_SSD1306 *display, struct MeterData
 
     display->setTextSize(1);
     display->print("Engery: ");
-    display->println(meterData->hardware_CounterValue);
+    display->println(meterData->delta_HeatEnergy_J);
 
     display->print("Water: ");
     display->println(meterData->water_CounterValue_m3);
 
     display->print("Up: ");
     display->print(meterData->temperature_up_Celcius);
+    display->print("/");
+    display->print(meterData->temperature_up_Celcius_mean);
     display->println(" 'C");
 
     display->print("Down: ");
     display->print(meterData->temperature_down_Celcius);
+    display->print("/");
+    display->print(meterData->temperature_down_Celcius_mean);
     display->println(" 'C");
+
+    display->print("State: ");
+    display->println(meterData->waterMeterState);
 
     display->display();
 }
