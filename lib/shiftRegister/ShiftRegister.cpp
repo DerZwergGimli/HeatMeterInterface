@@ -225,8 +225,8 @@ void ShiftRegisterIO::checkMeterResistance(struct ShiftRegisterIO *shiftRegister
 
     int analogValue = analogRead(A0);
 
-    Serial.print(analogValue);
-    Serial.print(meterData->mux_resistance_threshold);
+    // Serial.print(analogValue);
+    // Serial.print(meterData->mux_resistance_threshold);
 
     if (analogValue <= meterData->mux_resistance_threshold)
     {
@@ -265,6 +265,32 @@ void ShiftRegisterIO::checkMeterResistance(struct ShiftRegisterIO *shiftRegister
 
     shiftRegisterIO->r_MuxSelect(sr_io, 99);
     shiftRegisterIO->write(sr_io);
+}
+
+String ShiftRegisterIO::checkButton(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, String name)
+{
+    if (name.equals("UP") || name.equals("up"))
+    {
+        shiftRegisterIO->r_MuxSelect(sr_io, 1);
+        shiftRegisterIO->write(sr_io);
+
+        int analogValue = analogRead(A0);
+        Serial.print("B:");
+        Serial.print(analogValue);
+
+        return "UP";
+    }
+    if (name.equals("DOWN") || name.equals("down"))
+    {
+        shiftRegisterIO->r_MuxSelect(sr_io, 1);
+        return "DOWN";
+    }
+    if (name.equals("SELECT") || name.equals("select"))
+    {
+        shiftRegisterIO->r_MuxSelect(sr_io, 2);
+        return "SELECT";
+    }
+    return "";
 }
 
 void ShiftRegisterIO::led_ERROR(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle)

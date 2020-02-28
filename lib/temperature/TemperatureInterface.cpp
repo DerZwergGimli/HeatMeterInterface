@@ -2,6 +2,8 @@
 #include <Adafruit_MAX31865.h>
 #include "ShiftRegisterIO.h"
 #include "ConfigInterface.h"
+#include "MAX31865.h"
+#include <SPI.h>
 
 TemperatureInterface::TemperatureInterface()
 {
@@ -33,6 +35,58 @@ void TemperatureInterface::readTemperature(Adafruit_MAX31865 thermo, struct SR_I
         meterData->temperature_up_Celcius_sum = 0;
         meterData->temperature_up_Celcius_numberOfPoints = 0;
     }
+    SPI.begin();
+    SPI.setClockDivider(SPI_CLOCK_DIV16);
+    SPI.setDataMode(SPI_MODE3);
+    MAX31865_RTD rtd(MAX31865_RTD::RTD_PT100, D8, 240);
+    rtd.configure(true, true, false, false, MAX31865_FAULT_DETECTION_NONE,
+                  true, true, 0x0000, 0x7fff);
+    //delay(100);
+    rtd.read_all();
+
+    if (rtd.status() == 0)
+    {
+        double temperature = rtd.temperature();
+        Serial.print(" T = ");
+        Serial.print(temperature, 1);
+        Serial.println(" deg C");
+    }
+    else
+    {
+        Serial.print("RTD fault register: ");
+        Serial.print(rtd.status());
+        Serial.print(": ");
+        if (rtd.status() & MAX31865_FAULT_HIGH_THRESHOLD)
+        {
+            Serial.println("RTD high threshold exceeded");
+        }
+        else if (rtd.status() & MAX31865_FAULT_LOW_THRESHOLD)
+        {
+            Serial.println("RTD low threshold exceeded");
+        }
+        else if (rtd.status() & MAX31865_FAULT_REFIN)
+        {
+            Serial.println("REFIN- > 0.85 x V_BIAS");
+        }
+        else if (rtd.status() & MAX31865_FAULT_REFIN_FORCE)
+        {
+            Serial.println("REFIN- < 0.85 x V_BIAS, FORCE- open");
+        }
+        else if (rtd.status() & MAX31865_FAULT_RTDIN_FORCE)
+        {
+            Serial.println("RTDIN- < 0.85 x V_BIAS, FORCE- open");
+        }
+        else if (rtd.status() & MAX31865_FAULT_VOLTAGE)
+        {
+            Serial.println("Overvoltage/undervoltage fault");
+        }
+        else
+        {
+            Serial.println("Unknown fault; check connection");
+        }
+    }
+
+    thermo.begin();
 
     meterData->temperature_up_Celcius = temp_up;
     //meterData->temperature_up_Celcius_mean = ((float)meterData->temperature_up_Celcius_smooth.calc25(temp_up * 100)) / 100;

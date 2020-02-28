@@ -49,6 +49,7 @@ public:
     void write(struct SR_IO *sr_io);
 
     void checkMeterResistance(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, struct MeterData *meterData);
+    String checkButton(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, String name);
 
     // LED IO_Config
     void led_ERROR(struct ShiftRegisterIO *shiftRegisterIO, struct SR_IO *sr_io, bool toggle);
