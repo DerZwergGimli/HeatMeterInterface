@@ -35,8 +35,9 @@ struct MeterData
     float water_CounterValue_m3;
 
     float delta_HeatEnergy_J;
-    float mass_kg;
-    float specific_HeatCapacity_JpKGtK;
+    double absolute_HeatEnergy_MWh;
+    //float mass_kg;
+    //float specific_HeatCapacity_JpKGtK;
     float deltaTemperature_K;
 
     float RREF_up;

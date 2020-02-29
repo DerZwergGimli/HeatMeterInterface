@@ -14,13 +14,15 @@
 //Delegates for platform.io
 void displayTask_Callback();
 void measureTask_Callback();
+void sendDataTask_Callback();
 void readyLED(bool state);
 
 //Scheduled Task setup
 #define _TASK_SLEEP_ON_IDLE_RUN
 Scheduler runner;
-Task displayTask(1000, TASK_FOREVER, &displayTask_Callback, &runner, true);
-Task measureTask(1000, TASK_FOREVER, &measureTask_Callback, &runner, true);
+Task displayTask(500, TASK_FOREVER, &displayTask_Callback, &runner, true);
+Task measureTask(700, TASK_FOREVER, &measureTask_Callback, &runner, true);
+Task sendDataTask(700, TASK_FOREVER, &sendDataTask_Callback, &runner, true);
 
 // Display Configuration
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -88,6 +90,8 @@ void setup()
 
 void loop()
 {
+  //shiftRegisterIO.led_READY(&shiftRegisterIO, &sr_io, true);
+
   runner.execute();
 
   //1. Display
@@ -134,7 +138,6 @@ void loop()
 
 void displayTask_Callback()
 {
-  shiftRegisterIO.led_READY(&shiftRegisterIO, &sr_io, true);
   shiftRegisterIO.led_READY(&shiftRegisterIO, &sr_io, false);
   switch (displayState)
   {
@@ -170,6 +173,8 @@ void displayTask_Callback()
 
 void measureTask_Callback()
 {
+  shiftRegisterIO.led_READY(&shiftRegisterIO, &sr_io, false);
+
   unsigned long start = millis();
 
   shiftRegisterIO.led_RJ1(&shiftRegisterIO, &sr_io, true);
@@ -187,6 +192,8 @@ void measureTask_Callback()
   {
     meterData->water_CounterValue_m3 += 5;
     meterData->delta_HeatEnergy_J += 4200 * 5 * (meterData->temperature_up_Celcius_mean - meterData->temperature_down_Celcius_mean);
+    meterData->absolute_HeatEnergy_MWh = meterData->delta_HeatEnergy_J * 0.000000000277778;
+    Serial.println(meterData->absolute_HeatEnergy_MWh);
   }
 
   shiftRegisterIO.led_RJ1(&shiftRegisterIO, &sr_io, false);
