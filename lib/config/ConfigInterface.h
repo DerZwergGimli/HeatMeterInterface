@@ -6,14 +6,13 @@
 struct Configuratrion
 {
     int ID;
-    float RREF_RJ1_T1;
-    float RREF_RJ1_T2;
-    float RREF_RJ2_T1;
-    float RREF_RJ2_T2;
-    float RREF_RJ3_T1;
-    float RREF_RJ3_T2;
-    float RREF_RJ4_T1;
-    float RREF_RJ4_T2;
+    const char *name = "HeatMeterInterface";
+    const char *wifi_SSID = "IoT_Network";
+    const char *wifi_Password = "I2mN39996";
+    const char *mqtt_ServerAddress = "192.168.10.1";
+    const int mqtt_Port = 1883;
+    const char *mqtt_Username;
+    const char *mqtt_Password;
 };
 
 struct MeterData

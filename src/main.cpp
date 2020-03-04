@@ -8,21 +8,25 @@
 #include "DisplayInterface.h"
 #include <Adafruit_MAX31865.h>
 #include <Esp.h>
-
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
+//Scheduled Task setup
+//#define _TASK_ESP32_DLY_THRESHOLD 40L
+#define _TASK_SLEEP_ON_IDLE_RUN
 #include <TaskScheduler.h>
-
 //Delegates for platform.io
 void displayTask_Callback();
 void measureTask_Callback();
 void sendDataTask_Callback();
+
 void readyLED(bool state);
 
-//Scheduled Task setup
-#define _TASK_SLEEP_ON_IDLE_RUN
+WiFiEventHandler connectedWIFIEventHandler, disconnectedWIFIEventHandler;
+
 Scheduler runner;
-Task displayTask(500, TASK_FOREVER, &displayTask_Callback, &runner, true);
+Task displayTask(1100, TASK_FOREVER, &displayTask_Callback, &runner, true);
 Task measureTask(700, TASK_FOREVER, &measureTask_Callback, &runner, true);
-Task sendDataTask(700, TASK_FOREVER, &sendDataTask_Callback, &runner, true);
+//Task sendDataTask(10000, TASK_FOREVER, &sendDataTask_Callback, &runner, false);
 
 // Display Configuration
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -79,6 +83,19 @@ void setup()
   //runner.init();
   //runner.addTask(displayTask);
   //runner.addTask(measureTask);
+  // connectedWIFIEventHandler = WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP &event) {
+  //   Serial.print("Station connected, IP: ");
+  //   Serial.println(WiFi.localIP());
+  //   sendDataTask.enable();
+  // });
+
+  // disconnectedWIFIEventHandler = WiFi.onStationModeDisconnected([](const WiFiEventStationModeDisconnected &event) {
+  //   Serial.println("Station disconnected");
+  //   sendDataTask.disable();
+  // });
+
+  // WiFi.begin(config.wifi_SSID, config.wifi_Password);
+
   delay(1000);
   //displayTask.enable();
   //measureTask.enable();
@@ -214,6 +231,103 @@ void measureTask_Callback()
   unsigned long duration = end - start;
   Serial.print("Duration:");
   Serial.println(duration);
+}
+
+void sendDataTask_Callback()
+{
+
+  measureTask.disable();
+  WiFiClient espClient;
+  PubSubClient client(espClient);
+
+  // WiFi.forceSleepWake();
+
+  // WiFi.mode(WIFI_STA);
+
+  // WiFi.begin(config.wifi_SSID, config.wifi_Password);
+
+  // Serial.print("Connecting to WIFI");
+  // while (WiFi.status() != WL_CONNECTED)
+  // {
+  //   shiftRegisterIO.led_WIFI(&shiftRegisterIO, &sr_io, true);
+
+  //   unsigned long timestamp = millis();
+  //   //while (millis() <= timestamp + 500)
+  //   //{
+  //   //  ;
+  //   //}
+  //   //delay(100);
+  //   delay(500);
+  //   Serial.print(".");
+
+  //   shiftRegisterIO.led_WIFI(&shiftRegisterIO, &sr_io, false);
+  //   //system_soft_wdt_feed();
+  //   //ESP.wdtFeed();
+  //   //system_soft_wdt_feed();
+  //   //wdt_reset();
+  //   //ESP.wdtFeed();
+  // }
+  //Serial.println("Connected to the WiFi network");
+
+  shiftRegisterIO.led_WIFI(&shiftRegisterIO, &sr_io, true);
+  client.setServer(config.mqtt_ServerAddress, config.mqtt_Port);
+  //client.setCallback(callback
+
+  while (!client.connected())
+  {
+    Serial.println("Connecting to MQTT...");
+
+    if (client.connect(config.name))
+    {
+
+      Serial.println("connected");
+    }
+    else
+    {
+
+      Serial.print("failed with state ");
+      Serial.print(client.state());
+      shiftRegisterIO.led_ERROR(&shiftRegisterIO, &sr_io, true);
+      //delay(2000);
+    }
+
+    client.publish("esp/test", "Hello from ESP8266");
+
+    //char *s = ""; // initialized properly
+    //char *s;
+    //sprintf(char *s, "%s/temperature_down_Celcius", config.name);
+    //Serial.print(s);
+    char topic[100];
+    char message[100];
+
+    sprintf(topic, "%s/%d/water_CounterValue_m3", config.name, meterData[0].meterID);
+    sprintf(message, "%f", meterData[0].water_CounterValue_m3);
+    client.publish(topic, message);
+
+    sprintf(topic, "%s/%d/absolute_HeatEnergy_MWh", config.name, meterData[0].meterID);
+    sprintf(message, "%f", meterData[0].absolute_HeatEnergy_MWh);
+    client.publish(topic, message);
+
+    sprintf(topic, "%s/%d/temperature_up_Celcius", config.name, meterData[0].meterID);
+    sprintf(message, "%0.2f", meterData[0].temperature_up_Celcius);
+    client.publish(topic, message);
+
+    sprintf(topic, "%s/%d/temperature_down_Celcius", config.name, meterData[0].meterID);
+    sprintf(message, "%0.2f", meterData[0].temperature_down_Celcius);
+    client.publish(topic, message);
+  }
+  client.disconnect();
+  //wifi_set_sleep_type(LIGHT_SLEEP_T);
+  //WiFi.disconnect();
+  //WiFi.mode(WIFI_OFF);
+  //WiFi.disconnect();
+  //WiFi.forceSleepBegin();
+
+  measureTask.enable();
+
+  shiftRegisterIO.led_WIFI(&shiftRegisterIO, &sr_io, false);
+
+  shiftRegisterIO.led_ERROR(&shiftRegisterIO, &sr_io, false);
 }
 
 void readyLED(bool state)

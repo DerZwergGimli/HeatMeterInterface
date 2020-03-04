@@ -110,19 +110,19 @@ void ConfigInterface::serialPrintConfig(Configuratrion conf)
     Serial.print("Loaded ID: ");
     Serial.println(conf.ID);
     Serial.print("Loaded RREF_RJ1_T1: ");
-    Serial.println(conf.RREF_RJ1_T1);
+    //Serial.println(conf.RREF_RJ1_T1);
     Serial.print("Loaded RREF_RJ1_T2: ");
-    Serial.println(conf.RREF_RJ1_T2);
+    //Serial.println(conf.RREF_RJ1_T2);
     Serial.print("Loaded RREF_RJ2_T1: ");
-    Serial.println(conf.RREF_RJ2_T1);
+    //Serial.println(conf.RREF_RJ2_T1);
     Serial.print("Loaded RREF_RJ2_T2: ");
-    Serial.println(conf.RREF_RJ2_T2);
+    //Serial.println(conf.RREF_RJ2_T2);
     Serial.print("Loaded RREF_RJ3_T1: ");
-    Serial.println(conf.RREF_RJ3_T1);
+    //Serial.println(conf.RREF_RJ3_T1);
     Serial.print("Loaded RREF_RJ3_T2: ");
-    Serial.println(conf.RREF_RJ3_T2);
+    //Serial.println(conf.RREF_RJ3_T2);
     Serial.print("Loaded RREF_RJ4_T1: ");
-    Serial.println(conf.RREF_RJ4_T1);
+    //Serial.println(conf.RREF_RJ4_T1);
     Serial.print("Loaded RREF_RJ4_T2: ");
-    Serial.println(conf.RREF_RJ4_T2);
+    //Serial.println(conf.RREF_RJ4_T2);
 }
